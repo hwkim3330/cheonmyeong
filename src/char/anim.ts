@@ -494,9 +494,11 @@ export class Animator {
     }
     this.blinkT -= dt;
     if (this.blinkT < 0) {
-      rig.faceMat.map = rig.face.closed;
+      if (rig.blink) rig.blink(true);
+      else rig.faceMat.map = rig.face.closed;
       if (this.blinkT < -0.12) {
-        rig.faceMat.map = rig.face.open;
+        if (rig.blink) rig.blink(false);
+        else rig.faceMat.map = rig.face.open;
         this.blinkT = 2 + Math.random() * 3.5;
       }
     }

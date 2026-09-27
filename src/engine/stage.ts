@@ -33,14 +33,12 @@ export class Stage {
 
   constructor(canvas: HTMLCanvasElement) {
     const r = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: "high-performance" });
-    r.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     r.shadowMap.enabled = true;
     r.shadowMap.type = THREE.PCFSoftShadowMap;
     r.toneMapping = THREE.NeutralToneMapping;
     r.toneMappingExposure = 1.0;
     this.renderer = r;
     this.sun.castShadow = true;
-    this.sun.shadow.mapSize.set(4096, 4096);
     this.sun.shadow.bias = -0.0004;
     this.sun.shadow.normalBias = 0.05;
     const sc = this.sun.shadow.camera;
@@ -61,7 +59,43 @@ export class Stage {
     this.composer.addPass(new ShaderPass(GRADE));
     this.composer.addPass(new OutputPass());
     window.addEventListener("resize", () => this.resize());
+    const asked = new URLSearchParams(location.search).get("q");
+    let saved: string | null = null;
+    try {
+      saved = localStorage.getItem("cm.quality");
+    } catch {}
+    const pick = asked ?? saved;
+    this.autoQuality = !asked;
+    this.setQuality(pick !== null && QUALITY[+pick] ? +pick : QUALITY.length - 1);
+  }
+
+  /** Current preset index into QUALITY (0 lowest). */
+  quality = 0;
+  private autoQuality = true;
+  private frames = 0;
+  private slow = 0;
+
+  setQuality(q: number, manual = false): void {
+    if (manual) this.autoQuality = false;
+    const Q = QUALITY[q];
+    this.quality = q;
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, Q.dpr));
+    if (this.sun.shadow.mapSize.x !== Q.shadow) {
+      this.sun.shadow.mapSize.set(Q.shadow, Q.shadow);
+      this.sun.shadow.map?.dispose();
+      this.sun.shadow.map = null;
+    }
+    for (const t of [this.composer.renderTarget1, this.composer.renderTarget2]) {
+      if (t.samples !== Q.msaa) {
+        t.samples = Q.msaa;
+        t.dispose();
+      }
+    }
+    this.bloom.enabled = Q.bloom;
     this.resize();
+    try {
+      localStorage.setItem("cm.quality", String(q));
+    } catch {}
   }
 
   private makeSky(): THREE.Mesh {
@@ -111,6 +145,7 @@ export class Stage {
     const w = window.innerWidth;
     const h = window.innerHeight;
     this.renderer.setSize(w, h, false);
+    this.composer.setPixelRatio(this.renderer.getPixelRatio());
     this.composer.setSize(w, h);
     this.camera.aspect = w / h;
     this.camera.updateProjectionMatrix();
@@ -128,9 +163,25 @@ export class Stage {
 
   render(dt: number): void {
     this.time.value += dt;
+    // Step the preset down while frames run long (under ~40 fps for two seconds straight).
+    if (this.autoQuality && this.quality > 0 && dt > 0 && dt < 0.5) {
+      this.frames++;
+      if (dt > 1 / 40) this.slow++;
+      if (this.frames >= 120) {
+        if (this.slow > 90) this.setQuality(this.quality - 1);
+        this.frames = this.slow = 0;
+      }
+    }
     this.composer.render();
   }
 }
+
+/** Render presets, lowest first. */
+export const QUALITY = [
+  { name: "낮음", dpr: 0.75, shadow: 1024, msaa: 0, bloom: false },
+  { name: "보통", dpr: 1, shadow: 2048, msaa: 4, bloom: true },
+  { name: "높음", dpr: 1.5, shadow: 4096, msaa: 4, bloom: true },
+];
 
 const GRADE = {
   uniforms: { tDiffuse: { value: null } },

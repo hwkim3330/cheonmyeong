@@ -8,7 +8,8 @@
  */
 import * as THREE from "three";
 import { Animator } from "../char/anim";
-import { buildHero, type Rig } from "../char/model";
+import type { Rig } from "../char/model";
+import { rigFor } from "../char/skinned";
 import { TURBAN_LOOKS, type Element } from "../data/heroes";
 import { CAMPS } from "../world/layout";
 import type { Terrain } from "../world/terrain";
@@ -131,7 +132,7 @@ export class Enemies {
   private build(e: Enemy): void {
     const look = { ...TURBAN_LOOKS[e.def.look] };
     if (e.kind === "boss") Object.assign(look, { robe: 0xe8c43a, robe2: 0x5a1a1a, gearColor: 0xe8c43a, cape: 0x8a2a1a, bulk: 1.2 });
-    const rig = buildHero(look);
+    const rig = rigFor(e.kind === "boss" ? "turban-boss" : `turban-${e.def.look}`, look);
     rig.root.scale.setScalar(e.def.scale);
     this.group.add(rig.root);
     e.rig = rig;

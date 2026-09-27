@@ -75,6 +75,8 @@ export interface Rig {
   glowMats: THREE.MeshToonMaterial[];
   /** Hanging sleeves: kept vertical in world space. */
   drapes: THREE.Object3D[];
+  /** Blink (baked models swap the face texture through a uniform). */
+  blink?: (closed: boolean) => void;
 }
 
 const hexStr = (c: number) => "#" + c.toString(16).padStart(6, "0");

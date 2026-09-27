@@ -2,6 +2,8 @@ import * as THREE from "three";
 import { Stage } from "./engine/stage";
 import { Game } from "./game/game";
 import { showcase } from "./showcase";
+import { preloadModels } from "./char/skinned";
+import { HEROES, TURBAN_LOOKS } from "./data/heroes";
 import "./style.css";
 
 const canvas = document.getElementById("c") as HTMLCanvasElement;
@@ -15,7 +17,11 @@ declare global {
 }
 
 if (q.has("show")) {
-  const sc = showcase(stage, q.get("ids")?.split(","), q.get("anim") ?? "pose");
+  const sc = { update: (_dt: number) => {} };
+  showcase(stage, q.get("ids")?.split(","), q.get("anim") ?? "pose", q.get("old") === null).then((s) => {
+    sc.update = s.update;
+    window.__g.ready = true;
+  });
   const cam = { x: 0, y: 1.2, z: 0, dist: 9, yaw: 0, pitch: 0.12 };
   let last = performance.now();
   const frame = (now: number) => {
@@ -30,12 +36,19 @@ if (q.has("show")) {
     stage.render(dt);
   };
   requestAnimationFrame(frame);
-  window.__g = { cam, stage, sc, ready: true };
+  window.__g = { cam, stage, sc, ready: false };
 } else {
   const ui = document.getElementById("ui")!;
   ui.innerHTML = `<div id="loading"><b>天命</b><span>천하를 그리는 중…</span></div>`;
   // Let the loading screen paint before building the world.
-  setTimeout(() => {
+  setTimeout(async () => {
+    // Wait for the party, the common enemies and the elder; everything else streams in behind.
+    let party = ["liubei", "guanyu", "zhangfei"];
+    try {
+      party = JSON.parse(localStorage.getItem("cheonmyeong-v1") ?? "null")?.party ?? party;
+    } catch {}
+    await preloadModels([...party, ...["grunt", "spear", "archer"].map((k) => `turban-${k}`), "elder"]);
+    void preloadModels([...HEROES.map((h) => h.id), ...Object.keys(TURBAN_LOOKS).map((k) => `turban-${k}`), "turban-boss"]);
     const t0 = performance.now();
     const game = new Game(stage);
     console.log("world built in", Math.round(performance.now() - t0), "ms");

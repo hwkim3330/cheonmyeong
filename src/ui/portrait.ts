@@ -5,7 +5,7 @@
  */
 import * as THREE from "three";
 import { Animator } from "../char/anim";
-import { buildHero } from "../char/model";
+import { hasModel, rigFor, USE_BAKED } from "../char/skinned";
 import { ELEMENT_COLOR, HERO } from "../data/heroes";
 
 const cache = new Map<string, string>();
@@ -18,14 +18,15 @@ export function portrait(renderer: THREE.WebGLRenderer, id: string, kind: "bust"
   const W = kind === "bust" ? 256 : 512;
   const H = kind === "bust" ? 256 : 768;
   const scene = new THREE.Scene();
-  const rig = buildHero(def.look);
+  const rig = rigFor(def.id, def.look);
   scene.add(rig.root);
   const anim = new Animator(rig);
   anim.alwaysArmed = kind === "card";
   anim.play("pose");
   const still = { speed: 0, grounded: true, vy: 0, gliding: false, turn: 0, vel: new THREE.Vector3(), sprint: false };
   for (let k = 0; k < 40; k++) anim.update(1 / 30, still);
-  rig.faceMat.map = rig.face.open;
+  if (rig.blink) rig.blink(false);
+  else rig.faceMat.map = rig.face.open;
   const sun = new THREE.DirectionalLight(0xfff4e8, 2.4);
   sun.position.set(1.5, 2.5, 3);
   scene.add(sun, new THREE.HemisphereLight(0xd8e8ff, 0x8a7a6a, 0.9));
@@ -83,7 +84,8 @@ export function portrait(renderer: THREE.WebGLRenderer, id: string, kind: "bust"
   tmp.getContext("2d")!.putImageData(img, 0, 0);
   g.drawImage(tmp, 0, 0);
   const url = cv.toDataURL();
-  cache.set(key, url);
+  // A stand-in drawn before the hero's baked model arrived isn't kept.
+  if (!USE_BAKED || hasModel(id)) cache.set(key, url);
   rig.root.traverse((o) => (o as THREE.Mesh).geometry?.dispose());
   return url;
 }

@@ -71,7 +71,7 @@ export class UI {
         <div id="toasts"></div>
         <div id="bars"></div>
         <div id="pops"></div>
-        <div id="help">WASD 이동 · Shift 대시/질주 · Space 점프/활공 · 클릭 공격 · E 전법 · Q 필살 · 1–4 교체 · F 조사 · 마우스 시점(클릭하면 고정)</div>
+        <div id="help">WASD 이동 · Shift 대시/질주 · Space 점프/활공 · 클릭 공격 · E 전법 · Q 필살 · 1–4 교체 · F 조사 · F8 그래픽 · 마우스 시점(클릭하면 고정)</div>
       </div>
       <div id="dlg" class="off"><div class="face" id="dlgFace"></div><div class="body"><div class="who" id="dlgWho"></div><div class="txt" id="dlgTxt"></div><div class="next">▼ 클릭 / F</div></div></div>
       <div id="screen" class="off"></div>`;

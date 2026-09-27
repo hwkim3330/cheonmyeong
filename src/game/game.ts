@@ -6,7 +6,9 @@
  */
 import * as THREE from "three";
 import { Animator } from "../char/anim";
-import { buildHero } from "../char/model";
+import type { Rig } from "../char/model";
+import { rigFor } from "../char/skinned";
+import { QUALITY } from "../engine/stage";
 import { TURBAN_LOOKS } from "../data/heroes";
 import type { Stage } from "../engine/stage";
 import { addOutlines, toon } from "../engine/toon";
@@ -43,7 +45,7 @@ export class Game {
   readonly combat: Combat;
   readonly ui: UI;
   readonly orbs: Orb[] = [];
-  private elder: { rig: ReturnType<typeof buildHero>; anim: Animator } | null = null;
+  private elder: { rig: Rig; anim: Animator } | null = null;
   t = 0;
   playing = false;
   private saveT = 0;
@@ -100,6 +102,13 @@ export class Game {
         const b = this.enemies.list.find((e) => e.kind === "boss");
         return b && b.alive && b.rig && b.state !== "idle" && b.pos.distanceTo(this.player.pos) < 60 ? b : null;
       },
+    });
+    // F8 cycles the render preset (and stops the automatic step-down).
+    window.addEventListener("keydown", (e) => {
+      if (e.code !== "F8") return;
+      const q = (this.stage.quality + 1) % QUALITY.length;
+      this.stage.setQuality(q, true);
+      this.ui.toast(`그래픽: ${QUALITY[q].name}`);
     });
     this.hooks();
   }
@@ -197,7 +206,7 @@ export class Game {
 
   private makeElder(): void {
     const look = { ...TURBAN_LOOKS.grunt, hair: 0xd8d4cc, hairStyle: "topknot" as const, headgear: "guan" as const, gearColor: 0x3a2a1a, robe: 0x8a6a4a, robe2: 0xe8dcc0, trim: 0x5a3a2a, sash: 0x5a3a2a, beard: "long" as const, stern: 0.2, robeLen: 0.85, sleeves: "wide" as const, weapon: { kind: "staff" as const, shaft: 0x5a3a1a, accent: 0x8a6a2a } };
-    const rig = buildHero(look);
+    const rig = rigFor("elder", look);
     rig.root.position.set(ELDER_POS[0], this.world.t.height(ELDER_POS[0], ELDER_POS[1]), ELDER_POS[1]);
     rig.root.rotation.y = 0.3;
     this.stage.scene.add(rig.root);

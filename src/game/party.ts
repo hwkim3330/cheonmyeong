@@ -6,7 +6,8 @@
 import * as THREE from "three";
 import { Animator } from "../char/anim";
 import { buildGlider } from "../char/glider";
-import { buildHero, type Rig } from "../char/model";
+import type { Rig } from "../char/model";
+import { rigFor } from "../char/skinned";
 import { HERO, type HeroDef } from "../data/heroes";
 
 export interface Member {
@@ -41,7 +42,7 @@ export class Party {
     this.members.length = 0;
     for (const e of list) {
       const def = HERO[e.id];
-      const rig = buildHero(def.look);
+      const rig = rigFor(def.id, def.look);
       const anim = new Animator(rig);
       const glider = buildGlider(def.look.cape ?? def.look.robe, def.look.trim);
       rig.j.chest.add(glider);
