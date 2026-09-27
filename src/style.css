@@ -87,7 +87,8 @@ kbd { font-family: inherit; font-size: 10px; opacity: 0.75; border: 1px solid rg
 @keyframes bob { 50% { transform: translateY(3px); } }
 
 /* ---------------------------------------------------------------- screens */
-#screen { position: absolute; inset: 0; pointer-events: auto; overflow: auto; }
+#screen { position: absolute; inset: 0; pointer-events: auto; overflow: auto; z-index: 20; }
+#dlg { z-index: 15; }
 .wtop { display: flex; align-items: center; gap: 12px; padding: 18px 28px; }
 .wtop h2 { margin: 0; font-family: "Noto Serif KR", serif; font-weight: 900; font-size: 26px; flex: 1; }
 .wtop .x { margin-left: auto; width: 40px; height: 40px; padding: 0 !important; font-size: 16px; }

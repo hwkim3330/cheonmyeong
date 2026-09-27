@@ -24,8 +24,9 @@ export function buildGlider(color = 0xe84a4a, trim = 0xf6e0a0): THREE.Group {
       rib.position.set(sd * 0.85, -r * 0.2, 0.02);
       g.add(rib);
     }
-    const tail = new THREE.Mesh(new THREE.PlaneGeometry(0.08, 0.9).translate(0, -0.45, 0), edge);
-    tail.position.set(sd * 0.9, -0.85, 0);
+    const tail = new THREE.Mesh(new THREE.PlaneGeometry(0.06, 0.5).translate(0, -0.25, 0), edge);
+    tail.position.set(sd * 1.05, -0.8, 0);
+    tail.rotation.x = -0.6;
     g.add(tail);
   }
   const spar = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 3.9, 6).rotateZ(Math.PI / 2), bamboo);

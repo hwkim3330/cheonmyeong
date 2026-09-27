@@ -60,7 +60,7 @@ export function portrait(renderer: THREE.WebGLRenderer, id: string, kind: "bust"
   const g = cv.getContext("2d")!;
   // Background: a soft glow in the hero's element colour.
   const col = new THREE.Color(ELEMENT_COLOR[def.element]);
-  const gr = g.createRadialGradient(W / 2, H * 0.45, 10, W / 2, H * 0.5, W * 0.8);
+  const gr = g.createRadialGradient(W / 2, H * 0.48, 10, W / 2, H * 0.5, W * 0.5);
   gr.addColorStop(0, `rgba(${(col.r * 255) | 0},${(col.g * 255) | 0},${(col.b * 255) | 0},0.55)`);
   gr.addColorStop(1, "rgba(20,24,40,0)");
   g.fillStyle = gr;

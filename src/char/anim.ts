@@ -188,9 +188,16 @@ function clips(cls: WeaponClass): Record<string, Clip> {
     [0.5, { hips: P(-80, 0, 0), chest: P(-10), head: P(-20), armL: P(-160, 0, 30), armR: P(-160, 0, -30), thighL: P(-80), thighR: P(-70), shinL: P(20), shinR: P(40) }],
     [0.9, { hips: P(-88, 0, 0), chest: P(-5), head: P(-10), armL: P(-170, 0, 40), armR: P(-170, 0, -40), thighL: P(-85), thighR: P(-80), shinL: P(10), shinR: P(20) }],
   ] };
+  // A standing portrait pose: the weapon upright at the side, not across the face.
+  const show: Pose =
+    cls === "polearm"
+      ? { armR: P(-12, 0, -22), foreR: P(-75, 10, 0), wpn: P(90, 0, 8), armL: P(-8, 0, 14), foreL: P(-30, 0, 0) }
+      : cls === "sword"
+        ? { armR: P(-8, 0, -18), foreR: P(-30, 0, 0), wpn: P(60, 0, 40), armL: P(-8, 0, 14), foreL: P(-30, 0, 0) }
+        : armedIdle;
   c.pose = { dur: 2.4, armed: true, keys: [
-    [0, { ...armedIdle, chest: P(0, -20, 0), head: P(0, 15, 0) }],
-    [2.4, { ...armedIdle, chest: P(0, -20, 0), head: P(0, 15, 0) }],
+    [0, { ...show, chest: P(0, -15, 0), head: P(0, 12, 0) }],
+    [2.4, { ...show, chest: P(0, -15, 0), head: P(0, 12, 0) }],
   ] };
   return c;
 }
@@ -339,7 +346,8 @@ export class Animator {
     } else if (!m.grounded) {
       bob = 0;
       if (m.gliding) {
-        Object.assign(loco, { armL: [-0.2, 0, 1.3], armR: [-0.2, 0, -1.3], foreL: [-0.1, 0, 0], foreR: [-0.1, 0, 0], chest: [0.35, 0, 0], thighL: [0.3, 0, 0.1], thighR: [0.2, 0, -0.1], shinL: [0.5, 0, 0], shinR: [0.4, 0, 0] });
+        lay = 1.15;
+        Object.assign(loco, { armL: [-0.6, 0, 1.2], armR: [-0.6, 0, -1.2], foreL: [-0.2, 0, 0], foreR: [-0.2, 0, 0], chest: [0.05, 0, m.turn * 0.1], head: [-0.9, 0, 0], thighL: [0.15, 0, 0.12], thighR: [0.05, 0, -0.12], shinL: [0.4, 0, 0], shinR: [0.3, 0, 0] });
       } else {
         const up = m.vy > 0 ? 1 : 0;
         Object.assign(loco, {
